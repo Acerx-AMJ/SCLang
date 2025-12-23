@@ -2,7 +2,6 @@
 #define UTIL_ARENA_H
 
 #include <stddef.h>
-#include <stdint.h>
 
 typedef struct {
     char *base;
@@ -16,6 +15,7 @@ Arena Arena_init(size_t size);
 
 // Allocate
 
+void* Arena_memcpy(Arena *arena, const void *mem, size_t size);
 void* Arena_alloc(Arena *arena, size_t size);
 void* Arena_allocAligned(Arena *arena, size_t size, size_t alignment);
 

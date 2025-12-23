@@ -1,5 +1,6 @@
 #include "util/arena.h"
 #include <stdlib.h>
+#include <string.h>
 
 // Initialize
 
@@ -12,6 +13,17 @@ Arena Arena_init(size_t size) {
 }
 
 // Allocate
+
+void* Arena_memcpy(Arena *arena, const void *mem, size_t size) {
+   if (arena->used + size > arena->size) {
+      return NULL;
+   }
+
+   void *pointer = arena->base + arena->used;
+   memcpy(pointer, mem, size);
+   arena->used += size;
+   return pointer;
+}
 
 void* Arena_alloc(Arena *arena, size_t size) {
    if (arena->used + size > arena->size) {
