@@ -1,18 +1,18 @@
-#include "util/arena.h"
+#include "util/fileio.h"
 #include "util/string.h"
-#include "util/view.h"
 #include <stdio.h>
+#include <stdlib.h>
 
-int main() {
-   String a = String_copyCstringNew("Hello, Wor");
-   String_append(&a, 'l');
-   String_append(&a, 'd');
-   String_append(&a, '!');
+int main(int argc, char *argv[]) {
+   if (argc < 2) {
+      printf("Expected at least 2 arguments, got %d instead.\n", argc);
+      exit(EXIT_FAILURE);
+   }
 
-   Arena arena = Arena_init(1024 * 1024);
-   View v = View_takeoverNew(&arena, &a);
+   String input = String_copyCstringNew(argv[1]);
+   String code = readFileIfGiven(&input);
+   printf("'%s' - %lu\n", code.base, code.size);
 
-   printf("'%s' %lu\n", v.base, v.size);
-   Arena_free(&arena);
+   String_free(&code);
    return 0;
 }
