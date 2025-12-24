@@ -1,3 +1,4 @@
+#include "lexer/lexer.h"
 #include "util/arena.h"
 #include "util/fileio.h"
 #include "util/string.h"
@@ -17,8 +18,18 @@ int main(int argc, char *argv[]) {
    Arena arena = Arena_init(1024 * 1024);
    View code = View_takeoverNew(&arena, &codeString);
 
-   printf("'%s' - %lu\n", code.base, code.size);
+   // Lex the code
 
+   Lexer lexer = Lexer_init(&arena, &code);
+   Tokens tokens = Lexer_lex(&lexer);
+
+   Token *tokenArray = (Token*)tokens.start;
+   for (int i = 0; i < tokens.count; ++i) {
+      Token token = tokenArray[i];
+      printf("%d: '%s' - '%s' - %lu\n", i, token.lexeme.base, TokenTypeStrings[token.type], token.line);
+   }
+
+   Lexer_free(&lexer);
    Arena_free(&arena);
    return 0;
 }
