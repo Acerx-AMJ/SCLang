@@ -16,7 +16,7 @@ typedef enum {
 
 #define MAX_OPERATOR_SIZE 3
 
-static const char *TokenTypeStrings[] = {
+[[maybe_unused]] static const char *TokenTypeStrings[] = {
    "EOF", "Keyword", "Identifier", "Number", "Character", "String", "TokenTypeCommandStart",
    "++", "--", "=",
    "+=", "-=", "*=", "/=", "%=", "**=",
@@ -38,7 +38,7 @@ Token Token_init(TokenType type, View lexeme, size_t line);
 // Tokens structs
 
 typedef struct {
-   size_t start;
+   Token *start;
    size_t count;
 } Tokens;
 

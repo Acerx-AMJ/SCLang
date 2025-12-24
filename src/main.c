@@ -23,9 +23,8 @@ int main(int argc, char *argv[]) {
    Lexer lexer = Lexer_init(&arena, &code);
    Tokens tokens = Lexer_lex(&lexer);
 
-   Token *tokenArray = (Token*)tokens.start;
    for (int i = 0; i < tokens.count; ++i) {
-      Token token = tokenArray[i];
+      Token token = tokens.start[i];
       printf("%d: '%s' - '%s' - %lu\n", i, token.lexeme.base, TokenTypeStrings[token.type], token.line);
    }
 

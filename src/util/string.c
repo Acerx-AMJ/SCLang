@@ -119,7 +119,10 @@ void String_concatCstring(String *string1, const char *string2) {
 
 void String_append(String *string, char character) {
    if (string->size + 1 > string->capacity) {
-      size_t newCapacity = string->capacity ? string->capacity * 2 : 1;
+      size_t newCapacity = 1;
+      if (string->capacity) {
+         newCapacity = string->capacity * 2;
+      }
       String_resize(string, newCapacity);
    }
 

@@ -14,7 +14,7 @@ Token Token_init(TokenType type, View lexeme, size_t line) {
 
 Tokens Tokens_init(size_t start) {
    Tokens tokens;
-   tokens.start = start;
+   tokens.start = (Token*)start;
    tokens.count = 0;
    return tokens;
 }

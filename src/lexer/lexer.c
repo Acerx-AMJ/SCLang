@@ -1,5 +1,7 @@
 #include "lexer/lexer.h"
 #include <stdalign.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 // Initialize
 
@@ -19,19 +21,51 @@ Lexer Lexer_init(Arena *arena, View *code) {
 // Helper functions
 
 char Lexer_current(Lexer *lexer) {
-
+   if (lexer->index >= lexer->code->size) {
+      return 0;
+   }
+   return lexer->code->base[lexer->index];
 }
 
 char Lexer_peek(Lexer *lexer) {
-
+   if (lexer->index + 1 >= lexer->code->size) {
+      return 0;
+   }
+   return lexer->code->base[lexer->index + 1];
 }
 
 char Lexer_advance(Lexer *lexer) {
-
+   lexer->index += 1;
+   return Lexer_current(lexer);
 }
 
-char Lexer_getEscapeCode(Lexer *lexer, char character) {
+char Lexer_getEscapeCode(char character) {
+   if (character == 'a') {
+      return '\a';
+   } else if (character == 'b') {
+      return '\b';
+   } else if (character == 't') {
+      return '\t';
+   } else if (character == 'n') {
+      return '\n';
+   } else if (character == 'v') {
+      return '\v';
+   } else if (character == 'f') {
+      return '\f';
+   } else if (character == 'r') {
+      return '\r';
+   } else if (character == 'e') {
+      return '\e';
+   } else if (character == '\\') {
+      return '\\';
+   } else if (character == '\'') {
+      return '\'';
+   } else if (character == '"') {
+      return '"';
+   }
 
+   printf("Unknown escape code '\\%c'.\n", character);
+   exit(EXIT_FAILURE);
 }
 
 // Lex functions
