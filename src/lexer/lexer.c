@@ -1,4 +1,5 @@
 #include "lexer/lexer.h"
+#include <ctype.h>
 #include <stdalign.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,44 +41,50 @@ char Lexer_advance(Lexer *lexer) {
 }
 
 char Lexer_getEscapeCode(char character) {
-   if (character == 'a') {
-      return '\a';
-   } else if (character == 'b') {
-      return '\b';
-   } else if (character == 't') {
-      return '\t';
-   } else if (character == 'n') {
-      return '\n';
-   } else if (character == 'v') {
-      return '\v';
-   } else if (character == 'f') {
-      return '\f';
-   } else if (character == 'r') {
-      return '\r';
-   } else if (character == 'e') {
-      return '\e';
-   } else if (character == '\\') {
-      return '\\';
-   } else if (character == '\'') {
-      return '\'';
-   } else if (character == '"') {
-      return '"';
+   switch (character) {
+   case 'a':  return '\a';
+   case 'b':  return '\b';
+   case 't':  return '\t';
+   case 'n':  return '\n';
+   case 'v':  return '\v';
+   case 'f':  return '\f';
+   case 'r':  return '\r';
+   case 'e':  return '\e';
+   case '\\': return '\\';
+   case '\'': return '\'';
+   case '"':  return '"';
+   default:
+      printf("Unknown escape code '\\%c'.\n", character);
+      exit(EXIT_FAILURE);
    }
-
-   printf("Unknown escape code '\\%c'.\n", character);
-   exit(EXIT_FAILURE);
 }
 
 // Lex functions
 
 Tokens Lexer_lex(Lexer *lexer) {
-   View lexeme1 = View_copyCstringNew(&lexer->viewArena, "Plus lala ");
-   Lexer_alloc(lexer, PLUS, lexeme1);
+   for (char ch = Lexer_current(lexer); lexer->index < lexer->code->size; ch = Lexer_advance(lexer)) {
+      if (isspace(ch)) {
+         lexer->line += (ch == '\n');
+         continue;
+      }
 
-   lexer->line = 4;
+      // Handle comments
+      if (ch == '/' && Lexer_peek(lexer) == '/') {
+         for (; lexer->index < lexer->code->size && ch != '\n'; ch = Lexer_advance(lexer));
+         lexer->line += 1;
+      } else if (ch == '/' && Lexer_peek(lexer) == '*') {
+         size_t originalLine = lexer->line;
+         for (; lexer->index < lexer->code->size && (ch != '*' || Lexer_peek(lexer) != '/'); ch = Lexer_advance(lexer)) {
+            lexer->line += (ch == '\n');
+         }
 
-   View lexeme2 = View_copyCstringNew(&lexer->viewArena, "Some keyword");
-   Lexer_alloc(lexer, KEYWORD, lexeme2);
+         Lexer_advance(lexer);
+         if (lexer->index >= lexer->code->size) {
+            printf("Unterminated block comment at line %lu.\n", originalLine);
+            exit(EXIT_FAILURE);
+         }
+      }
+   }
    return lexer->tokens;
 }
 
