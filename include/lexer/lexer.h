@@ -25,7 +25,7 @@ Lexer Lexer_init(Arena *arena, View *code);
 char Lexer_current(Lexer *lexer);
 char Lexer_peek(Lexer *lexer);
 char Lexer_advance(Lexer *lexer);
-char Lexer_getEscapeCode(char character);
+char Lexer_getEscapeCode(Lexer *lexer, char character);
 
 // Lex functions
 

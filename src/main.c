@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 int main(int argc, char *argv[]) {
-   Error_assert(argc >= 2, ERROR_NLINE, "Expected at least 2 arguments, got %d instead.", argc);
+   Error_assertnl(argc >= 2, "Expected at least 2 arguments, got %d instead.", argc);
 
    String input = String_copyCstringNew(argv[1]);
    String codeString = readFileIfGiven(&input);

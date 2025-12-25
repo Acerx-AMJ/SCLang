@@ -138,6 +138,13 @@ void Error_assert(bool condition, int line, const char *msg, ...) {
    va_end(args);
 }
 
+void Error_assertnl(bool condition, const char *msg, ...) {
+   va_list args;
+   va_start(args, msg);
+   Error_vassert(condition, ERROR_NLINE, msg, args);
+   va_end(args);
+}
+
 void Error_raise(int line, const char *msg, ...) {
    va_list args;
    va_start(args, msg);

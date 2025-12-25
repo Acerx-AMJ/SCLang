@@ -1,4 +1,5 @@
 #include "util/string.h"
+#include "error/error.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -61,26 +62,17 @@ void String_copyCstring(String *string, const char *copyable) {
 // Get functions
 
 char String_at(const String *string, size_t index) {
-   if (index >= string->size) {
-      printf("String:String_at - index %lu is out of bounds (string size is %lu).\n", index, string->size);
-      exit(EXIT_FAILURE);
-   }
+   Error_assertnl(index < string->size, "String:String_at - index %lu is out of bounds (string size is %lu).\n", index, string->size);
    return string->base[index];
 }
 
 char String_last(const String *string) {
-   if (string->size == 0) {
-      printf("String:String_last - string is empty.\n");
-      exit(EXIT_FAILURE);
-   }
+   Error_assertnl(string->size != 0, "String:String_last - string is empty.\n");
    return string->base[string->size - 1];
 }
 
 char String_first(const String *string) {
-   if (string->size == 0) {
-      printf("String:String_first - string is empty.\n");
-      exit(EXIT_FAILURE);
-   }
+   Error_assertnl(string->size != 0, "String:String_first - string is empty.\n");
    return string->base[0];
 }
 
@@ -136,10 +128,7 @@ void String_append(String *string, char character) {
 void String_resize(String *string, size_t capacity) {
    if (string->capacity < capacity) {
       char *newBase = realloc(string->base, capacity + 1);
-      if (!newBase) {
-         printf("String:String_resize - failed to reallocate memory.");
-         exit(EXIT_FAILURE);
-      }
+      Error_assertnl(newBase != NULL, "String:String_resize - failed to reallocate memory.");
 
       string->base = newBase;
       string->capacity = capacity;
@@ -150,10 +139,7 @@ void String_resize(String *string, size_t capacity) {
 void String_resizeToFit(String *string) {
    if (string->size < string->capacity) {
       char *newBase = realloc(string->base, string->size + 1);
-      if (!newBase) {
-         printf("String:String_resizeToFit - failed to reallocate memory.");
-         exit(EXIT_FAILURE);
-      }
+      Error_assertnl(newBase != NULL, "String:String_resizeToFit - failed to reallocate memory.");
 
       string->base = newBase;
       string->capacity = string->size;

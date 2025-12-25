@@ -1,4 +1,5 @@
 #include "lexer/lexer.h"
+#include "error/error.h"
 #include <ctype.h>
 #include <stdalign.h>
 #include <stdio.h>
@@ -40,7 +41,7 @@ char Lexer_advance(Lexer *lexer) {
    return Lexer_current(lexer);
 }
 
-char Lexer_getEscapeCode(char character) {
+char Lexer_getEscapeCode(Lexer *lexer, char character) {
    switch (character) {
    case 'a':  return '\a';
    case 'b':  return '\b';
@@ -54,8 +55,7 @@ char Lexer_getEscapeCode(char character) {
    case '\'': return '\'';
    case '"':  return '"';
    default:
-      printf("Unknown escape code '\\%c'.\n", character);
-      exit(EXIT_FAILURE);
+      Error_raise(lexer->line, "Unknown escape code '\\%c'.", character);
    }
 }
 
@@ -79,10 +79,7 @@ Tokens Lexer_lex(Lexer *lexer) {
          }
 
          Lexer_advance(lexer);
-         if (lexer->index >= lexer->code->size) {
-            printf("Unterminated block comment at line %lu.\n", originalLine);
-            exit(EXIT_FAILURE);
-         }
+         Error_assert(lexer->index < lexer->code->size, lexer->line, "Unterminated block comment at line %lu.\n", originalLine);
       }
    }
    return lexer->tokens;
