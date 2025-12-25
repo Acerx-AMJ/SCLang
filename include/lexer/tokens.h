@@ -6,7 +6,7 @@
 // Token type
 
 typedef enum {
-   EOF, KEYWORD, IDENTIFIER, NUMBER, CHARACTER, STRING, TOKENTYPE_COMMAND_START,
+   EOF, KEYWORD, IDENTIFIER, NUMBER, CHARACTER, STRING,
    INCREMENT, DECREMENT, ASSIGN,
    PLUS_EQUALS, MINUS_EQUALS, MULTIPLY_EQUALS, DIVIDE_EQUALS, REMAINDER_EQUALS, EXPONENTIATE_EQUALS,
    PLUS, MINUS, MULTIPLY, DIVIDE, REMAINDER, EXPONENTIATE,
@@ -17,7 +17,7 @@ typedef enum {
 #define MAX_OPERATOR_SIZE 3
 
 [[maybe_unused]] static const char *TokenTypeStrings[] = {
-   "EOF", "Keyword", "Identifier", "Number", "Character", "String", "TokenTypeCommandStart",
+   "EOF", "Keyword", "Identifier", "Number", "Character", "String",
    "++", "--", "=",
    "+=", "-=", "*=", "/=", "%=", "**=",
    "+", "-", "*", "/", "%", "**",

@@ -30,7 +30,7 @@ char Lexer_getEscapeCode(Lexer *lexer, char character);
 // Lex functions
 
 Tokens Lexer_lex(Lexer *lexer);
-void Lexer_alloc(Lexer *lexer, TokenType type, View lexeme);
+void Lexer_alloc(Lexer *lexer, TokenType type, String *builder);
 
 // Free
 

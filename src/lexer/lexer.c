@@ -16,7 +16,7 @@ Lexer Lexer_init(Arena *arena, View *code) {
    lexer.tokens = Tokens_init((size_t)arena->base + arena->used);
 
    lexer.index = 0;
-   lexer.line = 0;
+   lexer.line = 1;
    return lexer;
 }
 
@@ -55,7 +55,7 @@ char Lexer_getEscapeCode(Lexer *lexer, char character) {
    case '\'': return '\'';
    case '"':  return '"';
    default:
-      Error_raise(lexer->line, "Unknown escape code '\\%c'.", character);
+      Error_raise(lexer->line, "Unknown escape code '\\%c', did you mean '\\\\%c'?.", character, character);
    }
 }
 
@@ -79,14 +79,94 @@ Tokens Lexer_lex(Lexer *lexer) {
          }
 
          Lexer_advance(lexer);
-         Error_assert(lexer->index < lexer->code->size, lexer->line, "Unterminated block comment at line %lu.\n", originalLine);
+         Error_assert(lexer->index < lexer->code->size, originalLine, "Unterminated block comment at line %lu.\n", originalLine);
+      
+      // Handle numbers
+      } else if (isdigit(ch)) {
+         String builder = String_init(5);
+         bool dot = false;
+         bool lastDash = false;
+
+         for (; lexer->index < lexer->code->size; ch = Lexer_advance(lexer)) {
+            if (isdigit(ch)) {
+               lastDash = false;
+               String_append(&builder, ch);
+            } else if (ch == '.' && !isdigit(Lexer_peek(lexer))) {
+               break;
+            } else if (ch == '.') {
+               if (dot) {
+                  break;
+               }
+               dot = true;
+               String_append(&builder, ch);
+            } else if (ch != '_') {
+               break;
+            }
+
+            if (ch == '_') {
+               Error_assert(!lastDash, lexer->line, "Expected number '%s' to not have two or more consecutive '_'.", builder.base);
+               lastDash = true;
+            }
+         }
+
+         Error_assert(!lastDash, lexer->line, "Expected number '%s' to not end with '_'.", builder.base);
+         Lexer_alloc(lexer, NUMBER, &builder);
+         lexer->index -= 1;
+      
+      // Handle identifiers and keywords
+      } else if (isalpha(ch) || ch == '_') {
+         String builder = String_init(8);
+
+         for (; lexer->index < lexer->code->size; ch = Lexer_advance(lexer)) {
+            if (!isalnum(ch) && ch != '_') {
+               break;
+            }
+            lexer->line += (ch == '\n');
+            String_append(&builder, ch);
+         }
+
+         // TODO: handle keywords and keyword operators
+         Lexer_alloc(lexer, IDENTIFIER, &builder);
+         lexer->index -= 1;
+
+      // Handle strings
+      } else if (ch == '"') {
+         String builder = String_init(16);
+         size_t originalLine = lexer->line;
+
+         for (ch = Lexer_advance(lexer); lexer->index < lexer->code->size && ch != '"'; ch = Lexer_advance(lexer)) {
+            if (ch == '\\') {
+               ch = Lexer_getEscapeCode(lexer, Lexer_advance(lexer));
+            }
+            String_append(&builder, ch);
+         }
+         Error_assert(ch == '"', originalLine, "Unterminated string.");
+         Lexer_alloc(lexer, STRING, &builder);
+
+      // Handle characters
+      } else if (ch == '\'') {
+         String builder = String_init(1);
+         String_append(&builder, Lexer_advance(lexer));
+
+         if (builder.base[0] == '\\') {
+            builder.base[0] = Lexer_getEscapeCode(lexer, Lexer_advance(lexer));
+         }
+
+         char ch = Lexer_advance(lexer);
+         Error_assert(ch == '\'', lexer->line, "Expected character to be one character long/unterminted character.");
+         Lexer_alloc(lexer, CHARACTER, &builder);
+
+      // Handle operators
+      } else {
+
       }
    }
    return lexer->tokens;
 }
 
-void Lexer_alloc(Lexer *lexer, TokenType type, View lexeme) {
+void Lexer_alloc(Lexer *lexer, TokenType type, String *builder) {
    Arena_allocAligned(lexer->arena, sizeof(Token), alignof(Token));
+   View lexeme = View_takeoverNew(&lexer->viewArena, builder);
 
    Token *tokens = (Token*)lexer->tokens.start;
    tokens[lexer->tokens.count].type = type;
